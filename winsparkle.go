@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-var winsparkle = syscall.MustLoadDLL("WinSparkle.dll")
+var winsparkle = syscall.NewLazyDLL("WinSparkle.dll")
 
 // Starts WinSparkle.
 //
@@ -28,7 +28,7 @@ var winsparkle = syscall.MustLoadDLL("WinSparkle.dll")
 // update is available, the respective UI is shown later from a separate
 // thread.
 func Init() {
-	winsparkle.MustFindProc("win_sparkle_init").Call()
+	winsparkle.NewProc("win_sparkle_init").Call()
 }
 
 // Cleans up after WinSparkle.
@@ -36,7 +36,7 @@ func Init() {
 // Should be called by the app when it's shutting down. Cancels any
 // pending Sparkle operations and shuts down its helper threads.
 func Cleanup() {
-	winsparkle.MustFindProc("win_sparkle_cleanup").Call()
+	winsparkle.NewProc("win_sparkle_cleanup").Call()
 }
 
 // Sets UI language from its ISO code.
@@ -47,7 +47,7 @@ func Cleanup() {
 // code, e.g. "fr", "pt-PT", "pt-BR" or "pt_BR", as used
 // e.g. by ::GetThreadPreferredUILanguages() too.
 func SetLang(lang string) {
-	winsparkle.MustFindProc("win_sparkle_set_lang").Call(string2uintptr(lang))
+	winsparkle.NewProc("win_sparkle_set_lang").Call(string2uintptr(lang))
 }
 
 // Sets UI language from its Win32 LANGID code.
@@ -57,7 +57,7 @@ func SetLang(lang string) {
 // Param langid must be a Language code (LANGID) as created by the MAKELANGID macro
 // or returned by e.g. ::GetThreadUILanguage()
 func SetLangID(langid uint32) {
-	winsparkle.MustFindProc("win_sparkle_set_langid").Call(uintptr(langid))
+	winsparkle.NewProc("win_sparkle_set_langid").Call(uintptr(langid))
 }
 
 // Sets URL for the app's appcast.
@@ -73,7 +73,7 @@ func SetLangID(langid uint32) {
 // Note: See https://github.com/vslavik/winsparkle/wiki/Appcast-Feeds for
 // more information about appcast feeds.
 func SetAppcastURL(url string) {
-	winsparkle.MustFindProc("win_sparkle_set_appcast_url").Call(string2uintptr(url))
+	winsparkle.NewProc("win_sparkle_set_appcast_url").Call(string2uintptr(url))
 }
 
 // Sets DSA public key.
@@ -86,7 +86,7 @@ func SetAppcastURL(url string) {
 // If this function isn't called by the app, public key is obtained from
 // Windows resource named "DSAPub" of type "DSAPEM".
 func SetDSAPubPEM(pem string) error {
-	r, _, _ := winsparkle.MustFindProc("win_sparkle_set_dsa_pub_pem").Call(string2uintptr(pem))
+	r, _, _ := winsparkle.NewProc("win_sparkle_set_dsa_pub_pem").Call(string2uintptr(pem))
 	if r == 0 {
 		return errors.New("invalid DSA public key provided")
 	}
@@ -104,7 +104,7 @@ func SetDSAPubPEM(pem string) error {
 // Note: `company` and `app` are used to determine the location of WinSparkle
 // settings in registry (HKCU\Software\<company>\<app>\WinSparkle is used).
 func SetAppDetails(company, appName, version string) {
-	winsparkle.MustFindProc("win_sparkle_set_app_details").Call(
+	winsparkle.NewProc("win_sparkle_set_app_details").Call(
 		string2wchar(company), string2wchar(appName), string2wchar(version))
 }
 
@@ -121,17 +121,17 @@ func SetAppDetails(company, appName, version string) {
 // version string. The version passed to sparkle.SetAppDetails()
 // corresponds to this and is used for display.
 func SetAppBuildVersion(build string) {
-	winsparkle.MustFindProc("win_sparkle_set_app_build_version").Call(string2wchar(build))
+	winsparkle.NewProc("win_sparkle_set_app_build_version").Call(string2wchar(build))
 }
 
 // Set custom HTTP header for appcast checks.
 func SetHTTPHeader(name, value string) {
-	winsparkle.MustFindProc("win_sparkle_set_http_header").Call(string2uintptr(name), string2uintptr(value))
+	winsparkle.NewProc("win_sparkle_set_http_header").Call(string2uintptr(name), string2uintptr(value))
 }
 
 // Clears all custom HTTP headers previously added using sparkle.SetHTTPHeader()
 func ClearHTTPHeaders() {
-	winsparkle.MustFindProc("win_sparkle_clear_http_headers").Call()
+	winsparkle.NewProc("win_sparkle_clear_http_headers").Call()
 }
 
 // Set the registry path where settings will be stored.
@@ -146,13 +146,13 @@ func ClearHTTPHeaders() {
 //
 //	sparkle.SetRegistryPath("Software\\My App\\Updates");
 func SetRegistryPath(path string) {
-	winsparkle.MustFindProc("win_sparkle_set_registry_path").Call(string2uintptr(path))
+	winsparkle.NewProc("win_sparkle_set_registry_path").Call(string2uintptr(path))
 }
 
 // Sets whether updates are checked automatically or only through a manual call.
 // If disabled, sparkle.CheckUpdateWithUI() must be used explicitly.
 func SetAutomaticCheckForUpdates(check bool) {
-	winsparkle.MustFindProc("win_sparkle_set_automatic_check_for_updates").Call(bool2uintptr(check))
+	winsparkle.NewProc("win_sparkle_set_automatic_check_for_updates").Call(bool2uintptr(check))
 }
 
 // Gets the automatic update checking state.
@@ -161,7 +161,7 @@ func SetAutomaticCheckForUpdates(check bool) {
 //
 // Note: Defaults to 0 when not yet configured (as happens on first start).
 func GetAutomaticCheckForUpdates() bool {
-	r, _, _ := winsparkle.MustFindProc("win_sparkle_get_automatic_check_for_updates").Call()
+	r, _, _ := winsparkle.NewProc("win_sparkle_get_automatic_check_for_updates").Call()
 	return r == 1
 }
 
@@ -169,14 +169,14 @@ func GetAutomaticCheckForUpdates() bool {
 //
 // Note: The minimum update interval is 1 hour.
 func SetUpdateCheckInterval(interval time.Duration) {
-	winsparkle.MustFindProc("win_sparkle_set_update_check_interval").Call(uintptr(interval.Seconds()))
+	winsparkle.NewProc("win_sparkle_set_update_check_interval").Call(uintptr(interval.Seconds()))
 }
 
 // Gets the automatic update interval.
 //
 // Default value is one day.
 func GetUpdateCheckInterval() time.Duration {
-	r, _, _ := winsparkle.MustFindProc("win_sparkle_get_update_check_interval").Call()
+	r, _, _ := winsparkle.NewProc("win_sparkle_get_update_check_interval").Call()
 	return time.Duration(r) * time.Second
 }
 
@@ -184,14 +184,14 @@ func GetUpdateCheckInterval() time.Duration {
 //
 // Default value is -1, indicating that the update check has never run.
 func GetLastCheckTime() time.Time {
-	r, _, _ := winsparkle.MustFindProc("win_sparkle_get_last_check_time").Call()
+	r, _, _ := winsparkle.NewProc("win_sparkle_get_last_check_time").Call()
 	return time.Unix(int64(r), 0)
 }
 
 // Set callback to be called when the updater encounters an error.
 func SetErrorCallback(cb func()) {
 	fn := func() uintptr { cb(); return 0 }
-	winsparkle.MustFindProc("win_sparkle_set_error_callback").Call(syscall.NewCallback(fn))
+	winsparkle.NewProc("win_sparkle_set_error_callback").Call(syscall.NewCallback(fn))
 }
 
 // Set callback for querying the application if it can be closed.
@@ -202,7 +202,7 @@ func SetErrorCallback(cb func()) {
 // the user has unsaved documents).
 func SetCanShutdownCallback(cb func() bool) {
 	fn := func() uintptr { return bool2uintptr(cb()) }
-	winsparkle.MustFindProc("win_sparkle_set_can_shutdown_callback").Call(syscall.NewCallback(fn))
+	winsparkle.NewProc("win_sparkle_set_can_shutdown_callback").Call(syscall.NewCallback(fn))
 }
 
 // Set callback for shutting down the application.
@@ -212,7 +212,7 @@ func SetCanShutdownCallback(cb func() bool) {
 // application.
 func SetShutdownRequestCallback(cb func()) {
 	fn := func() uintptr { cb(); return 0 }
-	winsparkle.MustFindProc("win_sparkle_set_shutdown_request_callback").Call(syscall.NewCallback(fn))
+	winsparkle.NewProc("win_sparkle_set_shutdown_request_callback").Call(syscall.NewCallback(fn))
 }
 
 // Set callback to be called when the updater did find an update.
@@ -221,7 +221,7 @@ func SetShutdownRequestCallback(cb func()) {
 // as it allows you to perform some action after WinSparkle checks for updates.
 func SetDidFindUpdateCallback(cb func()) {
 	fn := func() uintptr { cb(); return 0 }
-	winsparkle.MustFindProc("win_sparkle_set_did_find_update_callback").Call(syscall.NewCallback(fn))
+	winsparkle.NewProc("win_sparkle_set_did_find_update_callback").Call(syscall.NewCallback(fn))
 }
 
 // Set callback to be called when the updater did not find an update.
@@ -230,7 +230,7 @@ func SetDidFindUpdateCallback(cb func()) {
 // as it allows you to perform some action after WinSparkle checks for updates.
 func SetDidNotFindUpdateCallback(cb func()) {
 	fn := func() uintptr { cb(); return 0 }
-	winsparkle.MustFindProc("win_sparkle_set_did_not_find_update_callback").Call(syscall.NewCallback(fn))
+	winsparkle.NewProc("win_sparkle_set_did_not_find_update_callback").Call(syscall.NewCallback(fn))
 }
 
 // Set callback to be called when the user cancels a download.
@@ -239,7 +239,7 @@ func SetDidNotFindUpdateCallback(cb func()) {
 // as it allows you to perform some action when the installation is interrupted.
 func SetUpdateCancelledCallback(cb func()) {
 	fn := func() uintptr { cb(); return 0 }
-	winsparkle.MustFindProc("win_sparkle_set_update_cancelled_callback").Call(syscall.NewCallback(fn))
+	winsparkle.NewProc("win_sparkle_set_update_cancelled_callback").Call(syscall.NewCallback(fn))
 }
 
 // Checks if an update is available, showing progress UI to the user.
@@ -259,7 +259,7 @@ func SetUpdateCancelledCallback(cb func()) {
 // for updates, it ignores "Skip this version" even if the user checked it
 // previously.
 func CheckUpdateWithUI() {
-	winsparkle.MustFindProc("win_sparkle_check_update_with_ui").Call()
+	winsparkle.NewProc("win_sparkle_check_update_with_ui").Call()
 }
 
 // Checks if an update is available, showing progress UI to the user and
@@ -274,7 +274,7 @@ func CheckUpdateWithUI() {
 // may wish to use sparkle.SetDidNotFindUpdateCallback() and
 // sparkle.SetUpdateCancelledCallback().
 func CheckUpdateWithUIAndInstall() {
-	winsparkle.MustFindProc("win_sparkle_check_update_with_ui_and_install").Call()
+	winsparkle.NewProc("win_sparkle_check_update_with_ui_and_install").Call()
 }
 
 // Checks if an update is available.
@@ -290,5 +290,5 @@ func CheckUpdateWithUIAndInstall() {
 //
 // Note: This function respects "Skip this version" choice by the user.
 func CheckUpdateWithoutUI() {
-	winsparkle.MustFindProc("win_sparkle_check_update_without_ui").Call()
+	winsparkle.NewProc("win_sparkle_check_update_without_ui").Call()
 }
