@@ -1,3 +1,4 @@
+//go:build windows
 // +build windows
 
 // Package winsparkle provides go bindings for WinSparkle.
