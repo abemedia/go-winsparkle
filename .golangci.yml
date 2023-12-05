@@ -18,6 +18,7 @@ linters:
     - unused
   disable:
     - errcheck
+    - exhaustruct
     - depguard
     - goerr113
     - gci
