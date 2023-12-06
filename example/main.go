@@ -22,6 +22,18 @@ func main() {
 
 	c := make(chan struct{})
 
+	sparkle.SetErrorCallback(func() {
+		log.Println("received an error")
+	})
+
+	sparkle.SetDidFindUpdateCallback(func() {
+		log.Println("did find update")
+	})
+
+	sparkle.SetDidNotFindUpdateCallback(func() {
+		log.Println("did not find update")
+	})
+
 	sparkle.SetShutdownRequestCallback(func() {
 		log.Println("installing update")
 		close(c)
@@ -32,8 +44,30 @@ func main() {
 		close(c)
 	})
 
+	sparkle.SetUpdateSkippedCallback(func() {
+		log.Println("skipped update")
+	})
+
+	sparkle.SetUpdateDismissedCallback(func() {
+		log.Println("dismissed update")
+	})
+
+	sparkle.SetUpdatePostponedCallback(func() {
+		log.Println("postponed update")
+	})
+
+	sparkle.SetUserRunInstallerCallback(func(s string) (bool, error) {
+		log.Println("installer callback: " + s)
+		return true, nil
+	})
+
+	config := &store{data: make(map[string]string)}
+	sparkle.SetConfigMethods(config)
+
 	sparkle.Init()
 	defer sparkle.Cleanup()
+
+	time.Sleep(time.Second)
 
 	sparkle.CheckUpdateWithUI()
 
@@ -43,6 +77,31 @@ func main() {
 	case <-time.After(10 * time.Minute):
 	}
 	log.Println("shutting down")
+}
+
+type store struct {
+	data map[string]string
+}
+
+func (c *store) Read(name string) (string, bool) {
+	log.Println("reading config: " + name)
+	v, ok := c.data[name]
+	if !ok {
+		return "", false
+	}
+	return v, true
+}
+
+func (c *store) Write(name, value string) bool {
+	log.Printf("writing config: %s=%q\n", name, value)
+	c.data[name] = value
+	return true
+}
+
+func (c *store) Delete(name string) bool {
+	log.Println("deleting config: " + name)
+	delete(c.data, name)
+	return true
 }
 
 const pem = `-----BEGIN PUBLIC KEY-----
