@@ -23,6 +23,7 @@ linters:
     - goerr113
     - gci
     - gochecknoglobals
+    - gochecknoinits
     - gomnd
     - nlreturn
     - varnamelen
