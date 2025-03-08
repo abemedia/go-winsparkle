@@ -26,5 +26,6 @@ linters:
     - gochecknoinits
     - mnd
     - nlreturn
+    - paralleltest
     - varnamelen
     - wsl
