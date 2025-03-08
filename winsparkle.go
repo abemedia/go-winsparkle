@@ -57,6 +57,8 @@ func SetLang(lang string) {
 //
 // Param langid must be a Language code (LANGID) as created by the MAKELANGID
 // macro or returned by e.g. ::GetThreadUILanguage().
+//
+// See https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-lcid/
 func SetLangID(langid uint16) {
 	winsparkle.NewProc("win_sparkle_set_langid").Call(uintptr(langid))
 }
