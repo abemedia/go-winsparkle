@@ -18,7 +18,7 @@ func init() {
 		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
 			panic(err)
 		}
-		if err := os.WriteFile(file, dll, os.ModePerm); err != nil {
+		if err := os.WriteFile(file, dll, os.ModePerm); err != nil { //nolint:gosec
 			panic(err)
 		}
 	}

@@ -20,11 +20,11 @@ linters:
     - errcheck
     - exhaustruct
     - depguard
-    - goerr113
+    - err113
     - gci
     - gochecknoglobals
     - gochecknoinits
-    - gomnd
+    - mnd
     - nlreturn
     - varnamelen
     - wsl
