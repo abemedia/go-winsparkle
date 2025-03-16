@@ -6,7 +6,7 @@ This package provides go bindings for [WinSparkle](https://github.com/vslavik/wi
 Vaclav Slavik.
 
 WinSparkle is a plug-and-forget software update library for Windows applications. It is heavily
-inspired by the Sparkle framework for OS X written by Andy Matuschak and others, to the point of
+inspired by the Sparkle framework for MacOS written by Andy Matuschak and others, to the point of
 sharing the same updates format (appcasts) and having very similar user interface.
 
 See <https://winsparkle.org> for more information about WinSparkle.
@@ -35,19 +35,25 @@ import (
 	_ "github.com/abemedia/go-winsparkle/dll" // Embed DLL.
 )
 
-func main() {
-	sparkle.SetAppcastURL("https://dl.example.com/appcast.xml")
-	sparkle.SetAppDetails("example.com", "My Cool App", "1.0.0")
-	sparkle.SetAutomaticCheckForUpdates(true)
+//go:embed dsa-public-key.pem
+var dsaPublicKey string
 
-	if err := sparkle.SetDSAPubPEM(dsaPublicKey); err != nil {
+func main() {
+	winsparkle.SetAppcastURL("https://dl.example.com/appcast.xml")
+	winsparkle.SetAppDetails("example.com", "My Cool App", "1.0.0")
+	winsparkle.SetAutomaticCheckForUpdates(true)
+
+	if err := winsparkle.SetDSAPubPEM(dsaPublicKey); err != nil {
 		panic(err)
 	}
 
-	// Start your app before initiating WinSparkle.
-	runMyApp()
-
 	winsparkle.Init()
 	defer winsparkle.Cleanup()
+
+	runMyApp()
 }
 ```
+
+## Caveats
+
+WinSparkle only runs on Windows. For MacOS see <https://github.com/abemedia/go-sparkle>.
