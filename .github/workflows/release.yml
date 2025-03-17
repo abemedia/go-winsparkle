@@ -4,15 +4,36 @@ on:
   push:
     branches: [master]
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  release:
+  update-winsparkle:
     runs-on: ubuntu-latest
     steps:
-      - uses: GoogleCloudPlatform/release-please-action@v4
+      - name: Check out the repository
+        uses: actions/checkout@v3
+
+      - name: Compare versions
+        id: compare
+        run: |
+          CURRENT=$(curl -s https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest | jq -r .tag_name | tr -d 'v')
+          LATEST=$(awk -F\" '/const version =/ {print $2}' dll/dll.go)
+          echo "latest=$LATEST" >> $GITHUB_OUTPUT
+
+          if [ "$CURRENT" = "$LATEST" ]; then
+            echo "We are already up to date."
+            echo "release=false" >> $GITHUB_OUTPUT
+          else
+            echo "New version ($LATEST) is available!"
+            echo "release=true" >> $GITHUB_OUTPUT
+
+            echo "body<<EOF" >> $GITHUB_OUTPUT
+            curl -s https://api.github.com/repos/vslavik/winsparkle/releases/tags/v$LATEST | jq -r .body >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: steps.compare.outputs.release == 'true'
         with:
-          release-type: go
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          tag_name: v${{ steps.compare.outputs.latest }}
+          body: ${{ steps.compare.outputs.body }}
+          make_latest: true
