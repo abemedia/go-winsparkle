@@ -1,0 +1,66 @@
+name: Update WinSparkle
+
+on:
+  schedule:
+    - cron: 0 0 * * *
+  workflow_dispatch:
+
+jobs:
+  update-winsparkle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3
+
+      - name: Compare versions
+        id: compare
+        run: |
+          RELEASE=$(curl -s https://api.github.com/repos/vslavik/winsparkle/releases/latest)
+          LATEST=$(echo $RELEASE | jq -r .tag_name | tr -d 'v')
+          echo "Latest WinSparkle tag is: $LATEST"
+          echo "latest=$LATEST" >> $GITHUB_OUTPUT
+
+          CURRENT=$(awk -F\" '/const version =/ {print $2}' dll/dll.go)
+          echo "Current WinSparkle version is: $CURRENT"
+          echo "current=$CURRENT" >> $GITHUB_OUTPUT
+
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          echo $RELEASE | jq -r .body >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          if [ "$CURRENT" = "$LATEST" ]; then
+            echo "We are already up to date."
+            echo "update=false" >> $GITHUB_OUTPUT
+          else
+            echo "New version ($LATEST) is available!"
+            echo "update=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update WinSparkle
+        if: steps.compare.outputs.update == 'true'
+        run: |
+          NAME="WinSparkle-$LATEST"
+          wget https://github.com/vslavik/winsparkle/releases/download/v$LATEST/$NAME.zip
+          unzip $NAME.zip
+          rm $NAME.zip
+
+          find dll -type f -name "*.dll" -delete
+          cp -Lr $NAME/Release/WinSparkle.dll dll/x86
+          cp -Lr $NAME/x64/Release/WinSparkle.dll dll/x64
+          cp -Lr $NAME/ARM64/Release/WinSparkle.dll dll/arm64
+          rm -rf $NAME
+
+          sed -i "s/version = \"$CURRENT\"/version = \"$LATEST\"/g" dll/dll.go
+        env:
+          LATEST: ${{ steps.compare.outputs.latest }}
+          CURRENT: ${{ steps.compare.outputs.current }}
+
+      - name: Create Pull Request
+        if: steps.compare.outputs.update == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: update-winsparkle
+          sign-commits: true
+          commit-message: 'feat: update winsparkle to ${{ steps.compare.outputs.latest }}'
+          title: 'feat: update winsparkle to ${{ steps.compare.outputs.latest }}'
+          body: ${{ steps.compare.outputs.body }}

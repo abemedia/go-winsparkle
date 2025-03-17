@@ -54,6 +54,12 @@ func main() {
 }
 ```
 
+## Versions
+
+The version for `go-winsparkle` corresponds to the WinSparkle version. If you are not embedding the
+DLL by importing `github.com/abemedia/go-winsparkle/dll` please make sure that the version of
+`go-winsparkle` is the same as that of the DLL file or some functions might not work.
+
 ## Caveats
 
 WinSparkle only runs on Windows. For MacOS see <https://github.com/abemedia/go-sparkle>.
