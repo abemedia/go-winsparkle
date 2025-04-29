@@ -89,10 +89,34 @@ func SetAppcastURL(url string) {
 //
 // If this function isn't called by the app, public key is obtained from
 // Windows resource named "DSAPub" of type "DSAPEM".
+//
+// Deprecated: DSA signatures are deprecated and will be removed in a future version.
+// Migrate over to EdDSA (ed25519) using [SetEdDSAPublicKey], see
+// https://github.com/vslavik/winsparkle/wiki/Upgrading-from-DSA-to-EdDSA-signatures.
 func SetDSAPubPEM(pem string) error {
 	r, _, _ := winsparkle.NewProc("win_sparkle_set_dsa_pub_pem").Call(char(pem))
 	if r == 0 {
 		return errors.New("invalid DSA public key provided")
+	}
+	return nil
+}
+
+// SetEdDSAPublicKey sets EdDSA public key.
+//
+// Only base64 encoded format is supported.
+//
+// Public key will be used to verify EdDSA signature of the update file.
+// It will be set only if it contains valid EdDSA public key.
+//
+// If this function isn't called by the app, public key is obtained from
+// Windows resource named "EdDSAPub" of type "EDDSA".
+//
+// Note: If this function is called, DSA public key set with [SetDSAPubPEM]
+// or present in the resources will be ignored; so will DSA signatures in the appcast.
+func SetEdDSAPublicKey(key string) error {
+	r, _, _ := winsparkle.NewProc("win_sparkle_set_eddsa_public_key").Call(char(key))
+	if r == 0 {
+		return errors.New("invalid edDSA public key provided")
 	}
 	return nil
 }
