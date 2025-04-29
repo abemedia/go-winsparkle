@@ -1,27 +1,11 @@
-linters-settings:
-  govet:
-    enable-all: true
+version: '2'
 linters:
-  presets:
-    - bugs
-    - comment
-    - complexity
-    - error
-    - format
-    # - import
-    - metalinter
-    # - module
-    - performance
-    # - sql
-    - style
-    - test
-    - unused
+  default: all
   disable:
-    - errcheck
-    - exhaustruct
     - depguard
     - err113
-    - gci
+    - errcheck
+    - exhaustruct
     - gochecknoglobals
     - gochecknoinits
     - mnd
@@ -29,3 +13,26 @@ linters:
     - paralleltest
     - varnamelen
     - wsl
+  settings:
+    govet:
+      enable-all: true
+  exclusions:
+    presets:
+      - common-false-positives
+      - legacy
+    rules:
+      - linters: [revive]
+        path: example/
+        text: '^package-comments: should have a package comment$'
+formatters:
+  enable:
+    - gofmt
+    - gofumpt
+    - goimports
+  settings:
+    gofmt:
+      rewrite-rules:
+        - pattern: interface{}
+          replacement: any
+    gofumpt:
+      extra-rules: true
