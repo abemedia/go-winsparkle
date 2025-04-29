@@ -35,15 +35,12 @@ import (
 	_ "github.com/abemedia/go-winsparkle/dll" // Embed DLL.
 )
 
-//go:embed dsa-public-key.pem
-var dsaPublicKey string
-
 func main() {
 	winsparkle.SetAppcastURL("https://dl.example.com/appcast.xml")
 	winsparkle.SetAppDetails("example.com", "My Cool App", "1.0.0")
 	winsparkle.SetAutomaticCheckForUpdates(true)
 
-	if err := winsparkle.SetDSAPubPEM(dsaPublicKey); err != nil {
+	if err := winsparkle.SetEdDSAPublicKey("pXAx0wfi8kGbeQln11+V4R3tCepSuLXeo7LkOeudc/U="); err != nil {
 		panic(err)
 	}
 
