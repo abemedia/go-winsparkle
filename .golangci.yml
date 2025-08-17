@@ -10,9 +10,11 @@ linters:
     - gochecknoinits
     - mnd
     - nlreturn
+    - noinlineerr
     - paralleltest
     - varnamelen
     - wsl
+    - wsl_v5
   settings:
     govet:
       enable-all: true
