@@ -1,5 +1,4 @@
 //go:build windows
-// +build windows
 
 // Package dll loads the WinSparkle DLL.
 package dll

@@ -1,11 +1,9 @@
 //go:build windows
-// +build windows
 
 package winsparkle
 
 import (
 	"syscall"
-	"unicode/utf16"
 	"unsafe"
 )
 
@@ -40,13 +38,9 @@ func utf8PtrToString(p *uint8) string {
 	// Find NUL terminator.
 	n := 0
 	for ptr := unsafe.Pointer(p); *(*uint8)(ptr) != 0; n++ {
-		ptr = unsafe.Pointer(uintptr(ptr) + unsafe.Sizeof(*p))
+		ptr = unsafe.Add(ptr, unsafe.Sizeof(*p))
 	}
-
-	// Cast to very large array to slice out our data.
-	s := (*[1 << 29]uint8)(unsafe.Pointer(p))[:n:n]
-
-	return string(s)
+	return string(unsafe.Slice(p, n))
 }
 
 func utf16PtrToString(p *uint16) string {
@@ -57,13 +51,9 @@ func utf16PtrToString(p *uint16) string {
 	// Find NUL terminator.
 	n := 0
 	for ptr := unsafe.Pointer(p); *(*uint16)(ptr) != 0; n++ {
-		ptr = unsafe.Pointer(uintptr(ptr) + unsafe.Sizeof(*p))
+		ptr = unsafe.Add(ptr, unsafe.Sizeof(*p))
 	}
-
-	// Cast to very large array to slice out our data.
-	s := (*[1 << 29]uint16)(unsafe.Pointer(p))[:n:n]
-
-	return string(utf16.Decode(s))
+	return syscall.UTF16ToString(unsafe.Slice(p, n))
 }
 
 func configMethods(cs ConfigStore) unsafe.Pointer {
