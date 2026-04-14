@@ -31,7 +31,7 @@ jobs:
           fi
 
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         if: steps.compare.outputs.release == 'true'
         with:
           tag_name: v${{ steps.compare.outputs.latest }}
