@@ -41,16 +41,14 @@ jobs:
         run: |
           NAME="WinSparkle-$LATEST"
           wget https://github.com/vslavik/winsparkle/releases/download/v$LATEST/$NAME.zip
-          unzip $NAME.zip
-          rm $NAME.zip
 
           find dll -type f -name "*.dll" -delete
-          cp -Lr $NAME/Release/WinSparkle.dll dll/x86
-          cp -Lr $NAME/x64/Release/WinSparkle.dll dll/x64
-          cp -Lr $NAME/ARM64/Release/WinSparkle.dll dll/arm64
-          rm -rf $NAME
+          unzip -j $NAME.zip "$NAME/Win32/Release/WinSparkle.dll" -d dll/x86
+          unzip -j $NAME.zip "$NAME/x64/Release/WinSparkle.dll" -d dll/x64
+          unzip -j $NAME.zip "$NAME/ARM64/Release/WinSparkle.dll" -d dll/arm64
+          rm $NAME.zip
 
-          sed -i "s/version = \"$CURRENT\"/version = \"$LATEST\"/g" dll/dll.go
+          sed -i "s/version = \"$CURRENT\"/version = \"$LATEST\"/" dll/dll.go
         env:
           LATEST: ${{ steps.compare.outputs.latest }}
           CURRENT: ${{ steps.compare.outputs.current }}
