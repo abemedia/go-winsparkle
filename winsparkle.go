@@ -14,6 +14,7 @@ import (
 	"errors"
 	"syscall"
 	"time"
+	"unsafe"
 )
 
 var winsparkle = syscall.NewLazyDLL("WinSparkle.dll")
@@ -236,10 +237,20 @@ func GetUpdateCheckInterval() time.Duration {
 
 // GetLastCheckTime gets the time for the last update check.
 //
-// Default value is -1, indicating that the update check has never run.
+// Default value is the zero time, indicating that the update check has never run.
 func GetLastCheckTime() time.Time {
-	r, _, _ := winsparkle.NewProc("win_sparkle_get_last_check_time").Call()
-	return time.Unix(int64(r), 0)
+	r1, r2, _ := winsparkle.NewProc("win_sparkle_get_last_check_time").Call()
+	var t int64
+	if unsafe.Sizeof(uintptr(0)) == 8 {
+		t = int64(r1)
+	} else {
+		// win_sparkle_get_last_check_time returns a time_t, which is 64 bits.
+		t = int64(r2)<<32 | int64(r1)
+	}
+	if t == -1 {
+		return time.Time{}
+	}
+	return time.Unix(t, 0)
 }
 
 // SetErrorCallback sets callback to be called when the updater encounters an

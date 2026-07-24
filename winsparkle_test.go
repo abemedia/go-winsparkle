@@ -25,8 +25,9 @@ func TestWinSparkle(t *testing.T) {
 	winsparkle.CheckUpdateWithoutUI()
 	time.Sleep(time.Second) // Wait for update check.
 
-	if !winsparkle.GetLastCheckTime().After(last) {
-		t.Fatal("should check for updates")
+	check := winsparkle.GetLastCheckTime()
+	if !check.After(last) || !check.Before(time.Now()) {
+		t.Error("unexpected last check time:", check)
 	}
 }
 
