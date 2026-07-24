@@ -6,8 +6,8 @@ This package provides go bindings for [WinSparkle](https://github.com/vslavik/wi
 Vaclav Slavik.
 
 WinSparkle is a plug-and-forget software update library for Windows applications. It is heavily
-inspired by the Sparkle framework for MacOS written by Andy Matuschak and others, to the point of
-sharing the same updates format (appcasts) and having very similar user interface.
+inspired by the Sparkle framework for Mac written by Andy Matuschak and others, to the point of
+sharing the same update format (appcasts) and having a very similar user interface.
 
 See <https://winsparkle.org> for more information about WinSparkle.
 
