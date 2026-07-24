@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 )
 
-const version = "0.9.3"
+const version = "0.9.4"
 
 func init() {
 	dir := filepath.Join(os.TempDir(), "WinSparkle-"+version)
